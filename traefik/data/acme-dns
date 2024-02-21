@@ -1,0 +1,9 @@
+{
+    "sicurobrands.com": {
+        "fulldomain": "7a5fd38c-7c08-4cd9-80ac-370e2f5feeca.auth.acme-dns.io",
+        "subdomain": "7a5fd38c-7c08-4cd9-80ac-370e2f5feeca",
+        "username": "c1d67ddc-14a4-45ee-b5e9-e0cda64e62e6",
+        "password": "KYpasvIMaZ-UZt9OG2omwdjYHZLphLQZOuxxAq8c",
+        "server_url": "https://auth.acme-dns.io"
+    }
+}

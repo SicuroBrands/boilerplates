@@ -1,0 +1,61 @@
+version: '3'
+
+networks:
+  http_network:
+    name: http_network
+    external: true
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    tty: true
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      # - 8080:8080 # <-- (Optional) Enable Dashboard, don't do in production
+    environment:
+      - ACME_DNS_API_BASE=https://auth.acme-dns.io
+      - ACME_DNS_STORAGE_PATH=/acme-dns
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/acme-dns:/acme-dns
+      # Add folder with dynamic configuration yml
+      - ./data/configurations:/configurations
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.routers.traefik-secure.rule=Host(`devproxy.sicurobrands.com`)"
+      - "traefik.http.routers.traefik-secure.middlewares=user-auth@file"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=le-dns"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=sicurobrands.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.sicurobrands.com"
+
+    networks:
+      - http_network
+      # iam:
+      #   image: containous/whoami:v1.3.0
+      #   container_name: iam
+      #   networks:
+      #     - http_network
+      #   command:
+      #     - --port=8082 # Our service listens on 8082
+      #   labels:
+      #     - "traefik.enable=true"
+      #     # Change the host url here
+      #     - "traefik.http.routers.iam.rule=Host(`me.sicurobrands.online`)"
+      #     - "traefik.http.services.iam.loadbalancer.server.port=8082"
+      #     - "traefik.http.routers.iam.entrypoints=websecure"
+      #     - "traefik.http.routers.iam.tls=true"
+      #     - "traefik.http.routers.iam.tls.certresolver=le-dns"
+      # Change the password here
+      # - "traefik.http.routers.me.middlewares=auth"
+      # - "traefik.http.middlewares.auth.basicauth.users=admin:$apr1$tm53ra6x$FntXd6jcvxYM/YH0P2hcc1" 

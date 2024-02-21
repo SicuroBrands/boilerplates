@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  portainer-ce:
+    # ports:
+    #   - 8000:8000
+    #   - 9443:9443
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    image: portainer/portainer-ce:latest
+    labels:
+      - "traefik.enable=true"
+      # Change the host url here
+      - "traefik.http.routers.portainer.rule=Host(`ctrs.sicurobrands.com`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.tls.certresolver=le-dns"
+    networks:
+      - http_network
+volumes:
+  portainer_data:
+
+
+networks:
+  http_network:
+    name: http_network
+    external: true
